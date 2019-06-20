@@ -1,0 +1,52 @@
+version: '3'
+services:
+    react:
+        image: node:10-alpine
+        working_dir: "/work/app"
+        command: sh -c "cd react-app && yarn && yarn start"
+        ports:
+            - "3000:3000"
+        volumes:
+            - ./react-app:/work/app/react-app
+    nginx:
+        build: ./nginx
+        ports:
+            - "8080:80"
+        depends_on:
+            - php
+        volumes:
+            - ./nginx/logs:/var/log/nginx
+            - ./htdocs:/var/www/html 
+            - ./nginx/conf/default.conf:/etc/nginx/conf.d/default.conf
+            - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+    php:
+        build: ./php
+        volumes:
+            - ./htdocs:/var/www/html 
+            - ./php/php.ini:/usr/local/etc/php/php.ini
+    mariadb:
+        build: ./mariadb
+        ports:
+            - "13306:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: password
+            MYSQL_USER: hoge
+            MYSQL_PASSWORD: password
+        volumes:
+            - db:/var/lib/mysql
+            - ./db:/test
+    phpmyadmin:
+        build: ./phpmyadmin
+        environment:
+            - PMA_ARBITRARY=1
+            - PMA_HOST=mariadb
+            - PMA_USER=root
+            - PMA_PASSWORD=password
+        links:
+            - mariadb
+        ports:
+            - 4040:80
+        volumes:
+            - "./phpmyadmin/sessions:/sessions"
+volumes:
+  db:

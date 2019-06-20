@@ -1,0 +1,4 @@
+phpmyadmin/sessions/*
+nginx/logs/*
+htdocs/*
+!.gitkeep
